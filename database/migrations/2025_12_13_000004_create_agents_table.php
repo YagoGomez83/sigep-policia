@@ -14,20 +14,16 @@ return new class extends Migration
         Schema::create('agents', function (Blueprint $table) {
             $table->id();
             
-            // Información del cargo
-            $table->string('funcion', 100);
-            $table->enum('jerarquia', [
-                'Comisario Inspector',
-                'Comisario',
-                'Subcomisario',
-                'Principal',
-                'Inspector',
-                'Subinspector',
-                'Oficial',
-                'Sargento',
-                'Cabo',
-                'Agente'
-            ]);
+            // Relaciones con tablas catálogo (Normalización)
+            $table->foreignId('job_function_id')
+                ->constrained('job_functions')
+                ->onDelete('restrict')
+                ->comment('Función del agente');
+            
+            $table->foreignId('hierarchy_id')
+                ->constrained('hierarchies')
+                ->onDelete('restrict')
+                ->comment('Jerarquía policial');
             
             // Datos personales
             $table->string('apellido', 100)->index(); // Índice para búsquedas frecuentes
@@ -44,14 +40,18 @@ return new class extends Migration
             $table->string('correo_electronico', 150)->nullable();
             
             // Datos laborales
-            $table->string('lugar_trabajo', 200);
+            $table->foreignId('workplace_id')
+                ->constrained('workplaces')
+                ->onDelete('restrict')
+                ->comment('Lugar de trabajo del agente');
+            
             $table->unsignedInteger('numero_despacho')->nullable();
             $table->date('fecha_ingreso');
             $table->enum('situacion_revista', [
                 'Activo',
                 'Retiro',
                 'Pasiva'
-            ])->default('Activo');
+            ])->default('Activo')->index();
             
             // Datos del armamento
             $table->string('marca_arma', 100)->nullable();
@@ -63,8 +63,6 @@ return new class extends Migration
             
             // Índices compuestos para búsquedas comunes
             $table->index(['apellido', 'nombre']);
-            $table->index('situacion_revista');
-            $table->index('lugar_trabajo');
         });
     }
 
