@@ -17,17 +17,31 @@ class WorkplaceResource extends Resource
 {
     protected static ?string $model = Workplace::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Destino';
+    
+    protected static ?string $pluralModelLabel = 'Destinos / Dependencias';
+
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+
+    protected static ?string $navigationGroup = 'Configuración';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nombre del Destino')
                     ->required()
-                    ->maxLength(200),
+                    ->maxLength(200)
+                    ->placeholder('Ej: Comisaría Primera, Destacamento Zona Norte')
+                    ->columnSpanFull(),
                 Forms\Components\TextInput::make('location')
-                    ->maxLength(200),
+                    ->label('Ubicación')
+                    ->maxLength(200)
+                    ->placeholder('Ej: Av. Principal 1234, Zona Centro')
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -36,15 +50,31 @@ class WorkplaceResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Destino / Dependencia')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('location')
-                    ->searchable(),
+                    ->label('Ubicación')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap()
+                    ->icon('heroicon-m-map-pin')
+                    ->color('gray'),
+                Tables\Columns\TextColumn::make('agents_count')
+                    ->label('Personal Asignado')
+                    ->counts('agents')
+                    ->badge()
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Creado')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Actualizado')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -52,13 +82,18 @@ class WorkplaceResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Editar'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Eliminar'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Eliminar seleccionados'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('name', 'asc');
     }
 
     public static function getRelations(): array

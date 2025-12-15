@@ -17,18 +17,34 @@ class HierarchyResource extends Resource
 {
     protected static ?string $model = Hierarchy::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Jerarquía';
+    
+    protected static ?string $pluralModelLabel = 'Jerarquías';
+
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+
+    protected static ?string $navigationGroup = 'Configuración';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nombre de la Jerarquía')
                     ->required()
-                    ->maxLength(100),
+                    ->maxLength(100)
+                    ->placeholder('Ej: Comisario General, Oficial, Suboficial')
+                    ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('rank_level')
+                    ->label('Orden Jerárquico')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(100)
+                    ->placeholder('1 = Mayor jerarquía')
+                    ->helperText('Número que define el orden jerárquico (menor número = mayor jerarquía)'),
             ]);
     }
 
@@ -36,17 +52,30 @@ class HierarchyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('rank_level')
+                    ->label('Orden')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Jerarquía')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
+                Tables\Columns\TextColumn::make('agents_count')
+                    ->label('Personal')
+                    ->counts('agents')
+                    ->badge()
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Creado')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Actualizado')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -54,13 +83,18 @@ class HierarchyResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Editar'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Eliminar'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Eliminar seleccionados'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('rank_level', 'asc');
     }
 
     public static function getRelations(): array
