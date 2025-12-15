@@ -23,6 +23,7 @@ class Agent extends Model
         'dni',
         'legajo',
         'cuil_cuit',
+        'avatar_path',
         'fecha_nacimiento',
         'grupo_sanguineo',
         'domicilio_actual',

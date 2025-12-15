@@ -33,6 +33,14 @@ class AgentResource extends Resource
                 Section::make('Datos Personales')
                     ->description('Información personal del agente policial')
                     ->schema([
+                        Forms\Components\FileUpload::make('avatar_path')
+                            ->label('Foto de Perfil')
+                            ->avatar()
+                            ->image()
+                            ->imageEditor()
+                            ->disk('public')
+                            ->directory('agent-avatars')
+                            ->columnSpanFull(),
                         Grid::make(3)
                             ->schema([
                                 Forms\Components\TextInput::make('nombre')
@@ -158,6 +166,10 @@ class AgentResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('avatar_path')
+                    ->label('Foto')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/placeholder.png')),
                 Tables\Columns\TextColumn::make('legajo')
                     ->label('Legajo')
                     ->searchable()
