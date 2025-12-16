@@ -15,6 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seeders de catálogos
+        $this->call([
+            CatalogSeeder::class,
+        ]);
+
         // User::factory(10)->create();
 
         User::factory()->create([
